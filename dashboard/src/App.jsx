@@ -1,30 +1,21 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabase'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
+import PrivateRoute from './components/PrivateRoute'
 
 function App() {
-  const [status, setStatus] = useState('Connexion en cours...')
-
-  useEffect(() => {
-    async function testConnexion() {
-      const { data, error } = await supabase
-        .from('commerces')
-        .select('count')
-
-      if (error) {
-        setStatus('Erreur : ' + error.message)
-      } else {
-        setStatus('Supabase connecté !')
-      }
-    }
-
-    testConnexion()
-  }, [])
-
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h1>FoodRun Dashboard</h1>
-      <p>{status}</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
