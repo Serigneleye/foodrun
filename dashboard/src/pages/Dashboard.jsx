@@ -1,11 +1,44 @@
 import { useEffect, useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import Sidebar from '../components/Sidebar'
+import Produits from './Produits'
+import Commandes from './Commandes'
+import ValiderPin from './ValiderPin'
+
+function Accueil({ commerce }) {
+  return (
+    <div className="p-8">
+      <h2 className="text-2xl font-bold text-gray-800">
+        Bonjour {commerce?.nom || '👋'}
+      </h2>
+      <p className="text-gray-400 mt-1 text-sm">
+        Bienvenue sur votre espace commerçant FoodRun
+      </p>
+
+      <div className="grid grid-cols-3 gap-4 mt-8">
+        <div className="bg-white rounded-xl p-5 border border-gray-100">
+          <p className="text-xs text-gray-400 uppercase tracking-wide">Produits actifs</p>
+          <p className="text-3xl font-bold text-gray-800 mt-2">0</p>
+        </div>
+        <div className="bg-white rounded-xl p-5 border border-gray-100">
+          <p className="text-xs text-gray-400 uppercase tracking-wide">Commandes du jour</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">0</p>
+        </div>
+        <div className="bg-white rounded-xl p-5 border border-gray-100">
+          <p className="text-xs text-gray-400 uppercase tracking-wide">Recettes du jour</p>
+          <p className="text-3xl font-bold text-gray-800 mt-2">0 F</p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Dashboard() {
-  const [profil, setProfil] = useState(null)
+  const [commerce, setCommerce] = useState(null)
 
   useEffect(() => {
-    async function chargerProfil() {
+    async function chargerCommerce() {
       const { data: { user } } = await supabase.auth.getUser()
 
       const { data } = await supabase
@@ -14,44 +47,23 @@ export default function Dashboard() {
         .eq('id', user.id)
         .single()
 
-      setProfil(data)
+      if (data?.commerces) setCommerce(data.commerces)
     }
 
-    chargerProfil()
+    chargerCommerce()
   }, [])
 
-  const handleDeconnexion = async () => {
-    await supabase.auth.signOut()
-  }
-
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>FoodRun Dashboard</h1>
-        <button
-          onClick={handleDeconnexion}
-          style={{
-            padding: '8px 16px',
-            background: 'transparent',
-            border: '1px solid #ddd',
-            borderRadius: 8,
-            cursor: 'pointer',
-            fontSize: 13
-          }}
-        >
-          Déconnexion
-        </button>
-      </div>
-
-      {profil && (
-        <p style={{ color: '#888', marginTop: 8 }}>
-          Bienvenue, {profil.commerces?.nom || profil.prenom} 👋
-        </p>
-      )}
-
-      <p style={{ marginTop: 40, color: '#aaa' }}>
-        Le dashboard complet arrive bientôt...
-      </p>
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar commerce={commerce} />
+      <main className="flex-1">
+        <Routes>
+          <Route index element={<Accueil commerce={commerce} />} />
+          <Route path="produits" element={<Produits commerce={commerce} />} />
+          <Route path="commandes" element={<Commandes commerce={commerce} />} />
+          <Route path="pin" element={<ValiderPin />} />
+        </Routes>
+      </main>
     </div>
   )
 }

@@ -28,7 +28,7 @@ function App() {
         <Route path="/login" element={
           session ? <Navigate to="/dashboard" replace /> : <Login />
         } />
-        <Route path="/dashboard" element={
+        <Route path="/dashboard/*" element={
           <PrivateRoute>
             <Dashboard />
           </PrivateRoute>
