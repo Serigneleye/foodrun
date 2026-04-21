@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
 import Inscription from './pages/Inscription'
+import Admin from './pages/Admin'
 
 function App() {
   const [session, setSession] = useState(undefined)
@@ -35,6 +36,11 @@ function App() {
         <Route path="/dashboard/*" element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        } />
+        <Route path="/admin" element={
+          <PrivateRoute adminOnly={true}>
+            <Admin />
           </PrivateRoute>
         } />
         <Route path="*" element={
