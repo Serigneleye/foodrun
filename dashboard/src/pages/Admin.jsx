@@ -30,8 +30,11 @@ export default function Admin() {
     setChargement(false)
   }
 
-  async function validerCommerce(id, valide) {
-    await supabase.from('commerces').update({ valide }).eq('id', id)
+  async function validerCommerce(id, statut) {
+    await supabase
+      .from('commerces')
+      .update({ statut_compte: statut, valide: statut === 'actif' })
+      .eq('id', id)
     chargerDonnees()
   }
 
@@ -42,8 +45,9 @@ export default function Admin() {
     chargerDonnees()
   }
 
-  const aValider = commerces.filter(c => !c.valide)
-  const valides = commerces.filter(c => c.valide)
+  const aValider = commerces.filter(c => c.statut_compte === 'en_attente')
+  const valides = commerces.filter(c => c.statut_compte === 'actif')
+  const desactives = commerces.filter(c => c.statut_compte === 'desactive')
   const commissions = commandes
     .filter(c => c.statut === 'livree' && !c.reversement_effectue)
     .reduce((s, c) => s + (c.commission_foodrun || 0), 0)
@@ -117,13 +121,13 @@ export default function Admin() {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => validerCommerce(c.id, true)}
+                        onClick={() => validerCommerce(c.id, 'actif')}
                         className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
                       >
                         Valider
                       </button>
                       <button
-                        onClick={() => validerCommerce(c.id, false)}
+                        onClick={() => validerCommerce(c.id, 'desactive')}
                         className="text-xs text-red-400 hover:text-red-600 px-3 py-1.5 rounded-lg border border-red-100 transition"
                       >
                         Refuser
@@ -149,14 +153,45 @@ export default function Admin() {
                   </div>
                   <span className="text-sm text-gray-500">{c.categorie}</span>
                   <span className="text-xs text-gray-400">{c.mode_livraison}</span>
-                  <span className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 w-fit">
-                    Actif
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 w-fit">
+                      Actif
+                    </span>
+                    <button
+                      onClick={() => validerCommerce(c.id, 'desactive')}
+                      className="text-xs text-red-400 hover:text-red-600 transition"
+                    >
+                    Désactiver
+                    </button>
+                  </div>
                 </div>
               ))}
-            </div>
-          </div>
-        ) : (
+</div>
+
+{desactives.length > 0 && (
+  <div className="bg-red-50 border border-red-100 rounded-xl p-4 mt-4">
+    <p className="text-sm font-medium text-red-700 mb-3">
+      {desactives.length} commerce(s) désactivé(s)
+    </p>
+    {desactives.map(c => (
+      <div key={c.id} className="bg-white rounded-lg p-4 mb-2 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-800">{c.nom}</p>
+          <p className="text-xs text-gray-400">{c.categorie} · {c.quartier}, {c.ville}</p>
+        </div>
+        <button
+          onClick={() => validerCommerce(c.id, 'actif')}
+          className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
+        >
+          Réactiver
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
+</div>
+) : (
           <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
             <div className="grid grid-cols-5 px-4 py-3 text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
               <span>Commerce</span>

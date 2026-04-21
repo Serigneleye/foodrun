@@ -9,25 +9,39 @@ import ValiderPin from './ValiderPin'
 function Accueil({ commerce }) {
     if (!commerce) return null
   
-    if (!commerce.valide) {
-      return (
-        <div className="p-8 flex items-center justify-center min-h-screen">
-          <div className="text-center max-w-sm">
-            <div className="text-5xl mb-4">⏳</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Compte en cours de validation
-            </h2>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Votre commerce <strong>{commerce.nom}</strong> est en attente de validation.
-              Vous serez contacté dès que votre compte sera approuvé.
-            </p>
-            <p className="text-xs text-gray-300 mt-4">
-              Une question ? Contactez-nous sur WhatsApp
-            </p>
+    if (commerce.statut_compte === 'en_attente') {
+        return (
+          <div className="p-8 flex items-center justify-center min-h-screen">
+            <div className="text-center max-w-sm">
+              <div className="text-5xl mb-4">⏳</div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Compte en cours de validation
+              </h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Votre commerce <strong>{commerce.nom}</strong> est en attente de validation.
+                Vous serez contacté dès que votre compte sera approuvé.
+              </p>
+            </div>
           </div>
-        </div>
-      )
-    }
+        )
+      }
+    
+      if (commerce.statut_compte === 'desactive') {
+        return (
+          <div className="p-8 flex items-center justify-center min-h-screen">
+            <div className="text-center max-w-sm">
+              <div className="text-5xl mb-4">🚫</div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Compte désactivé
+              </h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Votre commerce <strong>{commerce.nom}</strong> a été désactivé.
+                Contactez-nous sur WhatsApp pour plus d'informations.
+              </p>
+            </div>
+          </div>
+        )
+      }
   
     return (
       <div className="p-8">
@@ -68,6 +82,11 @@ export default function Dashboard() {
           .select('*, commerces(*)')
           .eq('id', user.id)
           .single()
+        // Si admin → redirige vers /admin
+        if (data?.role === 'admin') {
+           window.location.href = '/admin'
+           return
+        }
     
         if (data?.commerces) setCommerce(data.commerces)
       }
@@ -77,13 +96,18 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar commerce={commerce} />
+      {commerce?.statut_compte === 'actif' && <Sidebar commerce={commerce} />}
       <main className="flex-1">
         <Routes>
           <Route index element={<Accueil commerce={commerce} />} />
-          <Route path="produits" element={<Produits commerce={commerce} />} />
-          <Route path="commandes" element={<Commandes commerce={commerce} />} />
-          <Route path="pin" element={<ValiderPin />} />
+          {commerce?.statut_compte === 'actif' && (
+            <>
+              <Route path="produits" element={<Produits commerce={commerce} />} />
+              <Route path="commandes" element={<Commandes commerce={commerce} />} />
+              <Route path="pin" element={<ValiderPin />} />
+            </>
+          )}
+          <Route path="*" element={<Accueil commerce={commerce} />} />
         </Routes>
       </main>
     </div>
