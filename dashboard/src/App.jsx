@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
+import Inscription from './pages/Inscription'
 
 function App() {
   const [session, setSession] = useState(undefined)
@@ -27,6 +28,9 @@ function App() {
       <Routes>
         <Route path="/login" element={
           session ? <Navigate to="/dashboard" replace /> : <Login />
+        } />
+        <Route path="/inscription" element={
+          session ? <Navigate to="/dashboard" replace /> : <Inscription />
         } />
         <Route path="/dashboard/*" element={
           <PrivateRoute>

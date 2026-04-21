@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Link } from 'react-router-dom'
 
 export default function Login() {
   const [telephone, setTelephone] = useState('')
@@ -66,6 +67,10 @@ export default function Login() {
           >
             {chargement ? 'Connexion...' : 'Se connecter'}
           </button>
+          <p className="text-center text-xs text-gray-400 mt-4">
+             Pas encore de compte ?{' '}
+             <Link to="/inscription" className="text-green-600 hover:underline">S'inscrire</Link>
+          </p>
         </form>
       </div>
     </div>
