@@ -77,7 +77,18 @@ export default function Inscription() {
     }
 
     setChargement(false)
-    // Supabase connecte automatiquement après signUp
+    
+    // Connecte automatiquement après inscription
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: emailFictif,
+      password: form.motDePasse
+    })
+
+    if (loginError) {
+        setErreur('Compte créé mais connexion échouée. Connectez-vous manuellement.')
+      } else {
+        window.location.href = '/dashboard'
+      }
   }
 
   return (
